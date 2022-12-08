@@ -1,0 +1,157 @@
+# setup
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import glob
+
+def file_name_list(path):
+    files = glob.glob('{}/*.txt'.format(path))    
+    return files
+
+def read(path,range_min,range_max):
+    data = pd.read_csv('{}'.format(path),encoding='shift-jis')
+    data2 = data[range_min:range_max].values.tolist()
+    data_lst = [[], []]
+    for i in data2:
+        wavelength, intensity = map(float, i[0].split())
+        data_lst[0].append(wavelength)
+        data_lst[1].append(intensity)
+    return data_lst
+
+
+def plot_func(file_name, label_name):
+    dataset = pd.read_csv('{}'.format(file_name),encoding="shift-jis")
+    wl = []
+    intensity = []
+    dataset2 = dataset[16:528].values.tolist()
+    for i in dataset2:
+        wl_val, intensity_val = map(float, i[0].split())
+        wl.append(wl_val)
+        intensity.append(intensity_val)    
+    ax.plot(wl, intensity, label='{}min'.format(label_name))
+    
+def spectrum_grapf(files, spectrum_name, spectrum_path):
+    for i in range(len(files)):
+        file_name = files[i]
+        plot_func(file_name, i)
+    ax.set_xlim(x_range_min, x_range_max)
+    ax.set_title(spectrum_name)
+    ax.set_xlabel('wavelength[nm]')
+    ax.set_ylabel('Intensity')
+    plt.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
+    plt.show()
+    fig.savefig(spectrum_path,bbox_inches='tight')
+    
+def standard_deviation(files):
+    r = range_max-range_min
+    intensity_data = [[]*i for i in range(len(files))]
+    for i in range(len(files)):
+        intensity_data[i].extend(read(files[i],range_min,range_max)[1])
+    intensity_array = np.array(intensity_data)
+    intensity_mean = np.sum(intensity_array, axis=0)/len(files)
+    intensity_variance = np.sum((intensity_array - intensity_mean)**2, axis=0)/(len(files))
+    intensity_variance2 = np.sum((intensity_array - intensity_mean)**2, axis=0)/(len(files)-1)
+    intensity_sd = intensity_variance**0.5 #population
+    intensity_sd2 = intensity_variance2**0.5 # sample
+    intensity_sd3 = np.std(intensity_array, axis=0, ddof=1)
+    return intensity_sd, intensity_mean, intensity_sd2
+
+def min_max(files):
+    r = range_max-range_min
+    intensity_data = [[]*i for i in range(len(files))]
+    for i in range(len(files)):
+        intensity_data[i].extend(read(files[i],range_min,range_max)[1])
+    intensity_array = np.array(intensity_data)
+    intensity_mean = np.sum(intensity_array, axis=0)/len(files)
+    intensity_min = np.min(intensity_array, axis=0)
+    intensity_max = np.max(intensity_array, axis=0)
+    return intensity_max - intensity_min, intensity_mean
+
+def error_bar_sdp(files, sdp_path, x_range_min, x_range_max):
+    fig, ax = plt.subplots()
+    intensity_error = standard_deviation(files)[0]
+    wavelength = read(files[0], range_min, range_max)[0]
+    intensity = standard_deviation(files)[1]
+    ax.errorbar(wavelength, intensity, yerr=intensity_error, capsize=3, fmt='o', ecolor='red', color='black', markersize=3)
+    ax.set_xlabel('wavelength[nm]')
+    ax.set_ylabel('Intensity')
+    ax.set_title('error bar : Standard Deviation of population')
+    ax.set_xlim(x_range_min, x_range_max)
+    plt.show()
+    fig.savefig(sdp_path)
+
+def error_bar_sds(files, sds_path, x_range_min, x_range_max):
+    fig, ax = plt.subplots()
+    intensity_error = standard_deviation(files)[2]
+    wavelength = read(files[0], range_min, range_max)[0]
+    intensity = standard_deviation(files)[1]
+    ax.errorbar(wavelength, intensity, yerr=intensity_error, capsize=3, fmt='o', ecolor='red', color='black', markersize=3)
+    ax.set_xlabel('wavelength[nm]')
+    ax.set_ylabel('Intensity')
+    ax.set_title('error bar : Standard Deviation of sample')
+    ax.set_xlim(x_range_min, x_range_max)
+    plt.show()
+    fig.savefig(sds_path)
+
+def error_bar_scope(files, scope_path,x_range_min, x_range_max):
+    fig, ax = plt.subplots()
+    intensity_error = min_max(files)[0]
+    wavelength = read(files[0], range_min, range_max)[0]
+    intensity = standard_deviation(files)[1]
+    ax.errorbar(wavelength, intensity, yerr=intensity_error, capsize=3, fmt='o', ecolor='red', color='black', markersize=3)
+    ax.set_xlabel('wavelength[nm]')
+    ax.set_ylabel('Intensity')
+    ax.set_title('error bar : scope')
+    ax.set_xlim(x_range_min, x_range_max)
+    plt.show()
+    fig.savefig(scope_path)
+    print('OK')
+
+
+
+# 
+def plot_func_normalization(file_name, label_name):
+    dataset = pd.read_csv('{}'.format(file_name),encoding="shift-jis")
+    wl = []
+    intensity = []
+    dataset2 = dataset[16:528].values.tolist()
+    for i in dataset2:
+        wl_val, intensity_val = map(float, i[0].split())
+        wl.append(wl_val)
+        intensity.append(intensity_val)
+    max_intensity = max(intensity)
+    intensity = [i/max_intensity for i in intensity]
+    ax.plot(wl, intensity, label='{}'.format(label_name))
+
+# change file name    
+def spectrum_grapf_name(files, spectrum_name, spectrum_path):
+    for i in range(len(files)):
+        file_name = files[i]
+        
+        plot_func(file_name, label_name)
+    ax.set_xlim(x_range_min, x_range_max)
+    ax.set_title(spectrum_name)
+    ax.set_xlabel('wavelength[nm]')
+    ax.set_ylabel('Intensity')
+    plt.hlines([0], x_range_min, x_range_max,'black')
+    plt.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left', borderaxespad=0, ncol=1)
+    plt.show()
+    fig.savefig(spectrum_path,bbox_inches='tight')
+    
+range_min,range_max = 16, 528
+x_range_min, x_range_max = 1500, 1850
+path = 'folder name' # Folder name is the name of the folder containing the file to be processed
+spectrum_name = 'spectrum'
+
+spectrum_path = '{}/spectrum.png'.format(path)
+sdp_path = '{}/sdp.png'.format(path)
+sds_path = '{}/sds.png'.format(path)
+scope_path = '{}/scope.png'.format(path)
+
+files = file_name_list(path)
+
+fig, ax = plt.subplots()
+spectrum_grapf(files , spectrum_name, spectrum_path)
+#error_bar_sdp(files, sdp_path, x_range_min, x_range_max)
+#error_bar_sds(files, sds_path, x_range_min, x_range_max)
+#error_bar_scope(files, scope_path, x_range_min, x_range_max)
