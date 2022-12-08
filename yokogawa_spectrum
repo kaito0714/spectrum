@@ -1,0 +1,62 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import glob
+import os
+
+def file_name_list(path):
+    files = glob.glob('{}/*.CSV'.format(path))    
+    return files
+
+def read(file, range_min):
+    col_names = ['c00', 'c01']
+    df = pd.read_csv('{}'.format(file), sep=',', names=col_names, encoding='shift-jis')
+    x_data = np.array(df['c00'][range_min:], dtype=float)
+    y_data = np.array(df['c01'][range_min:], dtype=float)
+    return x_data, y_data
+
+def plot_func(file, range_min, check):
+    x, y = read(file, range_min)
+    label_name = os.path.splitext(os.path.basename(file))[0]
+    if '{}'.format(check) in label_name:
+      y = (y - np.min(y)) / (np.max(y) - np.min(y))
+      ax.plot(x, y, label='{}'.format(label_name))
+        
+def spectrum(files, range_min, check, x_range_min, x_range_max, spectrum_name, spectrum_path):
+    for i in files:
+        plot_func(i, range_min, check)
+    ax.set_xlim(x_range_min, x_range_max)
+    ax.set_title(spectrum_name)
+    ax.set_xlabel('wavelength[nm]')
+    ax.set_ylabel('Intensity')
+    plt.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
+    plt.show()
+    fig.savefig(spectrum_path,bbox_inches='tight')
+    
+def log_spectrum(files, range_min, check, x_range_min, x_range_max, spectrum_name, spectrum_path):
+    for i in files:
+        plot_func(i, range_min, check)
+    ax.set_xlim(x_range_min, x_range_max)
+    ax.set_title(spectrum_name)
+    ax.set_xlabel('wavelength[nm]')
+    ax.set_ylabel('log ( Intensity )')
+    plt.legend(bbox_to_anchor=(1.05, 1.0), loc='upper left')
+    plt.yscale('log')
+    plt.show()
+    fig.savefig(spectrum_path,bbox_inches='tight')
+    
+    
+    
+range_min = 34
+check = ''
+x_range_min, x_range_max = 1535, 1585
+
+path = 'flde rname' # Folder name is the name of the folder containing the file to be processed
+spectrum_name = ''
+spectrum_path = path
+
+files = file_name_list(path)
+
+
+fig, ax = plt.subplots()
+spectrum(files, range_min, check, x_range_min, x_range_max, spectrum_name, spectrum_path)
