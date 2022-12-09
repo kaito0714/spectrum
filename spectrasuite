@@ -1,4 +1,4 @@
-# setup
+#------------------------------ setup ------------------------------
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -106,10 +106,7 @@ def error_bar_scope(files, scope_path,x_range_min, x_range_max):
     plt.show()
     fig.savefig(scope_path)
     print('OK')
-
-
-
-# 
+    
 def plot_func_normalization(file_name, label_name):
     dataset = pd.read_csv('{}'.format(file_name),encoding="shift-jis")
     wl = []
@@ -123,7 +120,6 @@ def plot_func_normalization(file_name, label_name):
     intensity = [i/max_intensity for i in intensity]
     ax.plot(wl, intensity, label='{}'.format(label_name))
 
-# change file name    
 def spectrum_grapf_name(files, spectrum_name, spectrum_path):
     for i in range(len(files)):
         file_name = files[i]
@@ -138,6 +134,11 @@ def spectrum_grapf_name(files, spectrum_name, spectrum_path):
     plt.show()
     fig.savefig(spectrum_path,bbox_inches='tight')
     
+    
+    
+    
+    
+#------------------------------ run ------------------------------    
 range_min,range_max = 16, 528
 x_range_min, x_range_max = 1500, 1850
 path = 'folder name' # Folder name is the name of the folder containing the file to be processed
@@ -152,6 +153,6 @@ files = file_name_list(path)
 
 fig, ax = plt.subplots()
 spectrum_grapf(files , spectrum_name, spectrum_path)
-#error_bar_sdp(files, sdp_path, x_range_min, x_range_max)
-#error_bar_sds(files, sds_path, x_range_min, x_range_max)
-#error_bar_scope(files, scope_path, x_range_min, x_range_max)
+error_bar_sdp(files, sdp_path, x_range_min, x_range_max)
+error_bar_sds(files, sds_path, x_range_min, x_range_max)
+error_bar_scope(files, scope_path, x_range_min, x_range_max)
