@@ -1,3 +1,4 @@
+#------------------------------ setup ------------------------------
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -47,6 +48,9 @@ def log_spectrum(files, range_min, check, x_range_min, x_range_max, spectrum_nam
     
     
     
+    
+    
+#------------------------------ run ------------------------------
 range_min = 34
 check = ''
 x_range_min, x_range_max = 1535, 1585
